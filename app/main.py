@@ -28,7 +28,7 @@ from  sqlalchemy.sql.expression import func
 import json
 from app import app
 from app.models import db
-from app.models.models import User,Clip, Question, Topic
+from app.models.models import User,Clip, Question, Topic, User_Question
 from app.models.schema import ClipSchema, QuestionSchema
 import requests
 
@@ -69,7 +69,26 @@ def get_questions():
 
     return jsonify(questions)
 
+@app.route('/api/answer_question/', methods=['POST'])
+def answer_question():
+    user_id = request.json.get('user_id')
+    question_id = request.json.get('question_id')
+    best_option = request.json.get('best_option')
+    worst_option = request.json.get('worst_option')
 
+    if not user_id or not question_id or not best_option or not worst_option:
+        abort(404)
+
+    user = User.query.get(user_id)
+    question = Question.query.get(question_id)
+    if not user or not question:
+        abort(404)
+
+    new_answer = User_Question(user_id=user_id, question_id=question_id, best_option=best_option, worst_option=worst_option)
+    db.session.add(new_answer)
+    db.session.commit()
+
+    return Response(status=201)
 
 # @app.route('/api/update_questions/', methods=['PUT'])
 # def UpdateQuestions():
