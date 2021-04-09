@@ -24,10 +24,11 @@ input: {
 """
 
 from flask import request, abort, Response, Blueprint, jsonify
+from  sqlalchemy.sql.expression import func
 import json
 from app import app
 from app.models import db
-from app.models.models import User,Clip, Question
+from app.models.models import User,Clip, Question, Topic
 from app.models.schema import ClipSchema, QuestionSchema
 import requests
 
@@ -47,6 +48,27 @@ def new_user():
     db.session.refresh(new_user)
 
     return jsonify({'user_id':new_user.user_id})
+
+
+@app.route('/api/get_questions/', methods=['GET'])
+def get_questions():
+    topics = Topic.query.all()
+
+    # get 2 from each topic
+    questions = []
+    for topic in topics:
+        two_questions = Question.query.order_by(func.random()).limit(2)
+        #two_questions_json = QuestionSchema(many=True).jsonify(two_questions).json
+        for question in two_questions:
+            option_1 = ClipSchema().jsonify(question.option_1).json
+            option_2 = ClipSchema().jsonify(question.option_2).json
+            option_3 = ClipSchema().jsonify(question.option_3).json
+            option_4 = ClipSchema().jsonify(question.option_4).json
+            questions.append({'topic':topic.title, 'question_id':question.question_id, 'option_1':option_1, 'option_2':option_2, 'option_3':option_3, 'option_4':option_4})
+        #questions.extend(two_questions_json)
+
+    return jsonify(questions)
+
 
 
 # @app.route('/api/update_questions/', methods=['PUT'])
