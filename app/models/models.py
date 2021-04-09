@@ -9,7 +9,7 @@ class Topic(db.Model):
     __tablename__ = 'topics'
 
     topic_id= db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email= db.Column(db.String(128), unique=True)
+    title= db.Column(db.String(128))
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -23,6 +23,7 @@ class Clip(db.Model):
 
     clip_id= db.Column(db.Integer, primary_key=True)
     embed_link=db.Column(db.Text)
+    start_time=db.Column(db.Integer, nullable=False)
     transcript=db.Column(db.Text)
     topic_id=db.Column(db.ForeignKey('topics.topic_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
 
@@ -38,11 +39,11 @@ class Question(db.Model):
     option_4_id=db.Column(db.ForeignKey('video_clips.clip_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
     topic_id=db.Column(db.ForeignKey('topics.topic_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
 
-    option_1 = db.relationship('Clip')
-    option_2 = db.relationship('Clip')
-    option_3 = db.relationship('Clip')
-    option_4 = db.relationship('Clip')
-    topic = db.relationship('Topic')
+    option_1 = db.relationship('Clip', foreign_keys=[option_1_id])
+    option_2 = db.relationship('Clip', foreign_keys=[option_2_id])
+    option_3 = db.relationship('Clip', foreign_keys=[option_3_id])
+    option_4 = db.relationship('Clip', foreign_keys=[option_4_id])
+    topic = db.relationship('Topic', foreign_keys=[topic_id])
 
 # user_class = db.Table(
 #     'user_class',
