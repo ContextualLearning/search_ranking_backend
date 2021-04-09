@@ -27,10 +27,31 @@ from flask import request, abort, Response, Blueprint, jsonify
 import json
 from app import app
 from app.models import db
-from app.models.models import Clip
-from app.models.schema import ClipSchema
+from app.models.models import Clip, Question
+from app.models.schema import ClipSchema, QuestionSchema
 import requests
 
+# @app.route('/api/update_questions/', methods=['PUT'])
+# def UpdateQuestions():
+#     topic_file = 'Infrared_Radiation_v1_id.txt.tuples'
+#     topic_id = 84
+#     with open(topic_file, 'r') as f:
+#         for line in f:
+#             data = line.split()
+#             #get data
+#             option_1_id=data[0]
+#             option_2_id=data[1]
+#             option_3_id=data[2]
+#             option_4_id=data[3]
+#
+#             #clean data
+#
+#             #add data
+#             new_question = Question(option_1_id=option_1_id, option_2_id=option_2_id, option_3_id=option_3_id, option_4_id=option_4_id, topic_id=topic_id)
+#             db.session.add(new_question)
+#             print(option_1_id, '|', option_2_id, '|', option_3_id, '|', option_4_id, '|', topic_id)
+#         db.session.commit()
+#     return Response(status=200)
 
 # @app.route('/api/update_clips/', methods=['PUT'])
 # def UpdateClips():
