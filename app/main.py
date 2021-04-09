@@ -27,9 +27,27 @@ from flask import request, abort, Response, Blueprint, jsonify
 import json
 from app import app
 from app.models import db
-from app.models.models import Clip, Question
+from app.models.models import User,Clip, Question
 from app.models.schema import ClipSchema, QuestionSchema
 import requests
+
+@app.route('/api/new_user/', methods=['POST'])
+def new_user():
+    uniqname = request.json.get('uniqname')
+    if not uniqname:
+        abort(404)
+
+    user = User.query.filter_by(uniqname=uniqname).first()
+    if user:
+        abort(404)
+
+    new_user = User(uniqname=uniqname)
+    db.session.add(new_user)
+    db.session.commit()
+    db.session.refresh(new_user)
+
+    return jsonify({'user_id':new_user.user_id})
+
 
 # @app.route('/api/update_questions/', methods=['PUT'])
 # def UpdateQuestions():
