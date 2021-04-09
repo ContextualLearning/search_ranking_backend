@@ -2,23 +2,22 @@ from . import ma
 from .models import *
 from marshmallow import pre_dump
 
-class ClassSchema(ma.SQLAlchemyAutoSchema):
+class TopicSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = Class
+        model = Topic
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
 
-class FileSchema(ma.SQLAlchemyAutoSchema):
+class ClipSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = File
+        model = Clip
 
-class VideoSchema(ma.SQLAlchemyAutoSchema):
+class QuestionSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = Video
-        exclude = ['transcript']
+        model = Question
 
-class UserClassSchema(ma.SQLAlchemyAutoSchema):
+class UserQuestionSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = User_Class
+        model = User_Question

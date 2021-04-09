@@ -3,69 +3,46 @@ import datetime
 import json
 import enum
 
-class semesterEnum(str, enum.Enum):
-    FA = 'FA'
-    WN = 'WN'
-    SP = 'SP'
-    SU = 'SU'
 
-class Class(db.Model):
-    __tablename__ = 'class'
 
-    class_id= db.Column(db.Integer, primary_key=True, autoincrement=True)
+class Topic(db.Model):
+    __tablename__ = 'topics'
+
+    topic_id= db.Column(db.Integer, primary_key=True, autoincrement=True)
     email= db.Column(db.String(128), unique=True)
-    password = db.Column(db.String(128))
-    title= db.Column(db.String(128), nullable=False, unique=True)
-    semester=db.Column(db.Enum(semesterEnum))
-    year=db.Column(db.Integer)
-    active=db.Column(db.Boolean)
-    cache_name=db.Column(db.String(128))
-    join_code = db.Column(db.String(7))
-    search_enabled = db.Column(db.Boolean, nullable=False)
-    vid_list_enabled = db.Column(db.Boolean, nullable=False)
-
-    users=db.relationship('User', secondary='user_class', back_populates="classes")
 
 class User(db.Model):
     __tablename__ = 'users'
 
-    user_id= db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email= db.Column(db.String(128), nullable=False, unique=True)
-    password = db.Column(db.String(128), nullable=False)
-    firstname=db.Column(db.String(128))
-    lastname=db.Column(db.String(128))
-    kaltura_key=db.Column(db.Text)
-
-    classes=db.relationship('Class', secondary='user_class', back_populates="users")
+    user_id= db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
+    uniqname= db.Column(db.String(128), nullable=False, unique=True)
 
 
-class File(db.Model):
-    __tablename__ = 'files'
+class Clip(db.Model):
+    __tablename__ = 'video_clips'
 
-    file_id= db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title= db.Column(db.String(128), nullable=False, unique=True)
-    file_link=db.Column(db.Text)
-    text=db.Column(db.Text)
-    date=db.Column(db.DateTime)
-    type=db.Column(db.String(128))
-    class_id=db.Column(db.ForeignKey('class.class_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    clip_id= db.Column(db.Integer, primary_key=True)
+    embed_link=db.Column(db.Text)
+    transcript=db.Column(db.Text)
+    topic_id=db.Column(db.ForeignKey('topics.topic_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
 
-    Class = db.relationship('Class')
+    topic = db.relationship('Topic')
 
-class Video(db.Model):
-    __tablename__ = 'videos'
+class Question(db.Model):
+    __tablename__ = 'questions'
 
-    video_id= db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title= db.Column(db.String(128), nullable=False, unique=True)
-    video_link=db.Column(db.Text)
-    transcript=db.Column(db.String(4294000000))
-    date=db.Column(db.DateTime)
-    type=db.Column(db.String(128))
-    slide=db.Column(db.Text)
-    image=db.Column(db.Text)
-    class_id=db.Column(db.ForeignKey('class.class_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    question_id= db.Column(db.Integer, primary_key=True, autoincrement=True)
+    option_1_id=db.Column(db.ForeignKey('video_clips.clip_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    option_2_id=db.Column(db.ForeignKey('video_clips.clip_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    option_3_id=db.Column(db.ForeignKey('video_clips.clip_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    option_4_id=db.Column(db.ForeignKey('video_clips.clip_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    topic_id=db.Column(db.ForeignKey('topics.topic_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
 
-    Class = db.relationship('Class')
+    option_1 = db.relationship('Clip')
+    option_2 = db.relationship('Clip')
+    option_3 = db.relationship('Clip')
+    option_4 = db.relationship('Clip')
+    topic = db.relationship('Topic')
 
 # user_class = db.Table(
 #     'user_class',
@@ -73,9 +50,11 @@ class Video(db.Model):
 #     db.Column('class_id', db.ForeignKey('class.class_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
 # )
 
-class User_Class(db.Model):
-    __tablename__ = 'user_class'
+class User_Question(db.Model):
+    __tablename__ = 'user_question'
     # user_id = db.Column('user_id', db.ForeignKey('users.user_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     # class_id = db.Column('class_id', db.ForeignKey('class.class_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
-    class_id = db.Column(db.ForeignKey('class.class_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    question_id = db.Column(db.ForeignKey('questions.question_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    best_option = db.Column(db.Integer)
+    worst_option = db.Column(db.Integer)
