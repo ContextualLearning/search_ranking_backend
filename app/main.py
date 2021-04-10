@@ -23,7 +23,7 @@ input: {
         }
 """
 
-from flask import request, abort, Response, Blueprint, jsonify
+from flask import request, abort, Response, Blueprint, jsonify, render_template, session, redirect, url_for
 from  sqlalchemy.sql.expression import func
 import json
 from app import app
@@ -32,25 +32,8 @@ from app.models.models import User,Clip, Question, Topic, User_Question
 from app.models.schema import ClipSchema, QuestionSchema
 import requests
 
-@app.route('/api/new_user/', methods=['POST'])
-def new_user():
-    uniqname = request.json.get('uniqname')
-    if not uniqname:
-        abort(404)
+MAX_QUESTIONS = 18
 
-    user = User.query.filter_by(uniqname=uniqname).first()
-    if user:
-        abort(404)
-
-    new_user = User(uniqname=uniqname)
-    db.session.add(new_user)
-    db.session.commit()
-    db.session.refresh(new_user)
-
-    return jsonify({'user_id':new_user.user_id})
-
-
-@app.route('/api/get_questions/', methods=['GET'])
 def get_questions():
     topics = Topic.query.all()
 
@@ -67,7 +50,129 @@ def get_questions():
             questions.append({'topic':topic.title, 'question_id':question.question_id, 'option_1':option_1, 'option_2':option_2, 'option_3':option_3, 'option_4':option_4})
         #questions.extend(two_questions_json)
 
-    return jsonify(questions)
+    return questions
+
+@app.route('/', methods=['GET'])
+def home():
+    if 'user_id' in session:
+        return redirect(url_for('show_question'))
+
+    return render_template('login.html')
+
+@app.route('/new_user/', methods=['POST', 'GET'])
+def new_user():
+
+    uniqname = request.form.get('uniqname')
+    print(uniqname)
+    if not uniqname:
+        abort(404)
+
+    print('ok')
+    user = User.query.filter_by(uniqname=uniqname).first()
+    print(user)
+    if user:
+        session['user_id'] = user.user_id
+        return redirect(url_for('show_question'))
+
+    new_user = User(uniqname=uniqname)
+    db.session.add(new_user)
+    db.session.commit()
+    db.session.refresh(new_user)
+
+    # 1. generate the questions
+    # 2. for each questions, add to use_question table without best and worst option
+    user_id = jsonify({'user_id':new_user.user_id})
+    print(user_id)
+
+    question = get_questions()
+    # print(question)
+    # print(json.dumps(question))
+
+    print(new_user.user_id)
+
+    for i in question:
+      user_id = new_user.user_id
+      question_id = i['question_id']
+      best_option = None
+      worst_option = None
+      new_answer = User_Question(user_id=user_id, question_id=question_id, best_option=best_option, worst_option=worst_option)
+      db.session.add(new_answer)
+      db.session.commit()
+
+    session['user_id'] = new_user.user_id
+
+    return redirect(url_for('show_question'))
+
+@app.route('/show_question/', methods=['POST'])
+def show_question():
+
+    if 'user_id' not in session:
+        return redirect(url_for('home'))
+    
+    user_questions = User_Question.query.filter_by(user_id=session['user_id']).order_by(User_Question.question_id.asc())
+
+    if 'curr_q_id' not in session:
+        session['curr_q_id'] = 0
+    else:
+        session['curr_q_id'] = (session['curr_q_id'] + 1) % MAX_QUESTIONS
+
+
+    # set context based on index
+    q_id = user_questions[session['curr_q_id']].question_id
+
+    question = Question.query.filter_by(question_id=q_id).first()
+    topic = Topic.query.filter_by(topic_id=question.topic_id).first()
+    clip_1 = Clip.query.filter_by(clip_id=question.option_1_id).first()
+    clip_2 = Clip.query.filter_by(clip_id=question.option_2_id).first()
+    clip_3 = Clip.query.filter_by(clip_id=question.option_3_id).first()
+    clip_4 = Clip.query.filter_by(clip_id=question.option_4_id).first()
+
+    best_option = -1
+    worst_option = -1
+
+    best_option_id = user_questions[session['curr_q_id']].best_option
+    worst_option_id = user_questions[session['curr_q_id']].worst_option
+
+    
+
+    if best_option_id != None:
+        # match to a clip, 0-
+        pass
+
+    if worst_option_id != None:
+        # match to a clip, 0-3
+        pass
+
+    context = {
+        'topic': topic.title,
+        'question_index': session['curr_q_id'] + 1,
+        'max_questions': MAX_QUESTIONS,
+        'best_option': best_option,
+        'worst_option': worst_option,
+        'option_1': {
+            'embed_link': clip_1.embed_link,
+            'transcript': clip_1.transcript,
+            'start_time': clip_1.start_time
+        },
+        'option_2': {
+            'embed_link': clip_2.embed_link,
+            'transcript': clip_2.transcript,
+            'start_time': clip_2.start_time
+        },
+        'option_3': {
+            'embed_link': clip_3.embed_link,
+            'transcript': clip_3.transcript,
+            'start_time': clip_3.start_time
+        },
+        'option_4': {
+            'embed_link': clip_4.embed_link,
+            'transcript': clip_4.transcript,
+            'start_time': clip_4.start_time
+        }
+    }
+    
+    return render_template('question.html', **context)
+
 
 @app.route('/api/answer_question/', methods=['POST'])
 def answer_question():

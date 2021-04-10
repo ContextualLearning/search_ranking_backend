@@ -1,0 +1,47 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html>
+
+<!--
+<div class="postcomments">
+    {% for postcomment in comments %}
+    <div class="postcomment">
+      <a href="/u/{{ postcomment['owner'] }}/">
+        {{ postcomment['owner'] }}
+      </a>
+      
+        {{ postcomment['text'] }}
+        {% if postcomment['owner'] == logname %}
+        <form action="/p/{{ postid }}/" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="commentid" value="{{ postcomment['commentid'] }}"/>
+          <input type="submit" name="uncomment" value="delete"/>
+        </form>
+        {% endif %}
+      
+    </div>
+    {% endfor %}
+    <form action="/p/{{ postid }}/" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="postid" value="{{ postid }}"/>
+      <input type="text" name="text"/>
+      <input type="submit" name="comment" value="comment"/>
+    </form>
+    {% if owner == logname %}
+      <form action="/p/{{ postid }}/" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="postid" value="{{ postid }}"/>
+        <input type="submit" name="delete" value="delete this post"/>
+      </form>
+    {% endif %}
+</div>
+-->
+
