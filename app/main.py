@@ -56,6 +56,7 @@ def get_questions():
 @app.route('/', methods=['GET'])
 def home():
     if 'user_id' in session:
+        session['curr_q_id'] = 0
         return redirect(url_for('show_question', id=str(session['curr_q_id'])))
 
     return render_template('login.html')
@@ -72,6 +73,7 @@ def new_user():
 
     if user:
         session['user_id'] = user.user_id
+        session['curr_q_id'] = 0
         return redirect(url_for('show_question',id=str(session['curr_q_id'])))
 
     new_user = User(uniqname=uniqname)
@@ -115,11 +117,10 @@ def show_question(id):
     
     user_questions = User_Question.query.filter_by(user_id=session['user_id']).order_by(User_Question.question_id.asc())
 
-    print(session)
+    session['annotate'] = len([u_q.question_id for u_q in user_questions if (u_q.best_option != None and u_q.worst_option != None)])
 
     session['curr_q_id'] = int(id)
     print(session['curr_q_id'])
-    session['annotate'] = max(session['annotate'], session['curr_q_id']-1)
 
     q_id = user_questions[session['curr_q_id']].question_id
 
