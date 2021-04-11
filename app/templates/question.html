@@ -25,21 +25,36 @@
 <body>
 
   <center>
-      <h1>Welcome to the Search Ranking Survey</h1>
-    <!-- <div name='user_id' id ='user_id'> Your User ID: {{user_id}}</div> -->
+      <h1>Welcome to Search Ranking Survey</h1>
+      <h2 style="color: crimson;">
+        Please take care of your choice, it means a lot to us! 
+        
+      </h2>
   </center>
 
-  <fieldset style="height: 800x; width: 900px;float:left;padding:50px;background-color:#bbcfe6;">
+  <fieldset style="height: 400x; width: 400px;float:left;padding:50px;background-color:#bbcfe6;">
+    <button style="float:left;" onclick="Goto(false)"> BACK </button>
+    <button style="float:right;"onclick="Goto(true)"> NEXT </button><br>
     <div class="column">
-      <div name="best_item" id="best_item">Best Item: {{best_option}}</div> 
-      <div name="worst_item" id="worst_item">Worst Item:{{worst_option}}</div>
-      <p>
+      <p style="font-size:x-small;float:left;">
+        <div>Progress: {{annotation}}/18</div>
+        <div>current_id: {{cur_id}}</div> 
+      </p>
+      <p style="font-size:x-small;float:right;">
+        <div name="best_item" id="best_item">Best Item: {{best_option_asc}}</div> 
+        <div name="worst_item" id="worst_item">Worst Item:{{worst_option_asc}}</div>
+      </p>
+      
+      <p style="color:coral; font-size: x-large;">
         Topic: {{topic}}
-      </p><br>
+      </p>
+      <p style="font-size: small;">
+        Select the most relevant video clip and the most unrelecant video clip below
+      </p>
       <div class="row">
           <div class= "w3-container" style="float:left;padding:30px;">
 
-              <iframe height={360} width={480} loading="lazy"
+              <iframe height={300} width={300} loading="lazy"
               src={{option_2.embed_link}}
               frameborder="0" allow="accelerometer; autoplay; clipboard-write;
               encrypted-media; gyroscope; picture-in-picture"
@@ -47,7 +62,7 @@
               <p style="width:300px;word-break:normal;white-space:pre-warp; word-wrap:break-word;">A. {{option_1.transcript}}</p>
           </div>
           <div style="float:left;padding:30px;">
-              <iframe height={360} width={480} loading="lazy"
+              <iframe height={300} width={300} loading="lazy"
               src={{option_2.embed_link}}
               frameborder="0" allow="accelerometer; autoplay; clipboard-write;
               encrypted-media; gyroscope; picture-in-picture"
@@ -57,7 +72,7 @@
       </div>
       <div class="row">
           <div class= "w3-container" style="float:left;padding:30px;">
-              <iframe height={360} width={480} loading="lazy"
+              <iframe height={300} width={300} loading="lazy"
               src={{option_3.embed_link}}
               frameborder="0" allow="accelerometer; autoplay; clipboard-write;
               encrypted-media; gyroscope; picture-in-picture"
@@ -65,7 +80,7 @@
               <p style="width:300px;word-break:normal;white-space:pre-warp; word-wrap:break-word;">C. {{option_3.transcript}}</p>
           </div>
           <div style="float:left;padding:30px;">
-              <iframe height={360} width={480} loading="lazy"
+              <iframe height={300} width={300} loading="lazy"
               src={{option_4.embed_link}}
               frameborder="0" allow="accelerometer; autoplay; clipboard-write;
               encrypted-media; gyroscope; picture-in-picture"
@@ -74,8 +89,6 @@
           </div>
       </div>
     </div><br>
-    <button style="float:left;" onclick="Goto(false)"> go back </button>
-    <button style="float:right;"onclick="Goto(true)"> go next </button>
   </fieldset>
 
   <div style="float:left;padding:50px;background-color:#fcfcfc;">
@@ -105,7 +118,7 @@
     
 </body>
 
-<script>
+<script> 
   function post(params, action) {
         var form = document.createElement("form");
         form.setAttribute("method", "post");
@@ -135,8 +148,6 @@
       console.log(best_option == 0);
       console.log(worst_option);
 
-
-
       if (best_option == 0)
       {
         alert('please select best_option');
@@ -144,6 +155,11 @@
       else if  (worst_option == 0)
       {
         alert('please select worst_option');
+      }
+
+      else if (best_option == worst_option)
+      {
+        alert('please give different question for each question')
       }
 
       else
@@ -154,12 +170,15 @@
         worst_item.innerHTML = String.fromCharCode(parseInt(worst_option) + 64);
     
         var post_req = {
+            id:{{question_index}},
             user_id: user_id,
             question_id: question_id,
             best_option:best_option,
-            worst_option: worst_option
+            worst_option: worst_option,
+            annotation:parseInt({{annotation}}) + 1
           }        
           // console.log(post_req);
+
           post(post_req, "/api/answer_question/");
       }
     }
@@ -167,7 +186,14 @@
     function Goto(next)
     {
       var id = {{question_index}};
-      if (next)
+      var best_option = {{best_option}};
+      var worst_option = {{worst_option}};
+      if (next && (best_option == -1 || worst_option == -1))
+      {
+        alert('please answer this question before go to next quesiton');
+        return;
+      }
+      else if (next)
       {
         id = id + 1;
       }
@@ -191,7 +217,7 @@
         };
 
         console.log(post_req);
-        post(post_req, "/show_question/" + id.toString());
+        post(post_req, "/show_question/" + (id).toString());
       }
     }
 

@@ -56,7 +56,7 @@ def get_questions():
 @app.route('/', methods=['GET'])
 def home():
     if 'user_id' in session:
-        return redirect(url_for('show_question', id = '1'))
+        return redirect(url_for('show_question', id=str(session['curr_q_id'])))
 
     return render_template('login.html')
 
@@ -68,12 +68,11 @@ def new_user():
     if not uniqname:
         abort(404)
 
-    print('ok')
     user = User.query.filter_by(uniqname=uniqname).first()
-    print(user)
+
     if user:
         session['user_id'] = user.user_id
-        return redirect(url_for('show_question', id='1'))
+        return redirect(url_for('show_question',id=str(session['curr_q_id'])))
 
     new_user = User(uniqname=uniqname)
     db.session.add(new_user)
@@ -82,21 +81,13 @@ def new_user():
 
     # 1. generate the questions
     # 2. for each questions, add to use_question table without best and worst option
-    user_id = jsonify({'user_id':new_user.user_id})
-    print(user_id)
 
     question = get_questions()
-    # print(question)
-    # print(json.dumps(question))
 
-    print(new_user.user_id)
 
     for i in question:
-    # for i in range(5):
       user_id = new_user.user_id
       question_id = i['question_id']
-      print(str(user_id) + ' '+ str(question_id))
-    #   print(question_id)
       best_option = None
       worst_option = None
       new_answer = User_Question(user_id=user_id, question_id=question_id, best_option=best_option, worst_option=worst_option)
@@ -104,8 +95,9 @@ def new_user():
       db.session.commit()
 
     session['user_id'] = new_user.user_id
+    session['annotate'] = 0
 
-    return redirect(url_for('show_question',id='1'))
+    return redirect(url_for('show_question',id=str(0)))
 
 @app.route('/show_question/<id>', methods=['POST', 'GET'])
 def show_question(id):
@@ -123,15 +115,12 @@ def show_question(id):
     
     user_questions = User_Question.query.filter_by(user_id=session['user_id']).order_by(User_Question.question_id.asc())
 
+    print(session)
+
     session['curr_q_id'] = int(id)
+    print(session['curr_q_id'])
+    session['annotate'] = max(session['annotate'], session['curr_q_id']-1)
 
-    # if 'curr_q_id' not in session:
-    #     session['curr_q_id'] = id
-    # else:
-    #     session['curr_q_id'] = (session['curr_q_id'] + 1) % MAX_QUESTIONS
-
-
-    # set context based on index
     q_id = user_questions[session['curr_q_id']].question_id
 
     question = Question.query.filter_by(question_id=q_id).first()
@@ -147,25 +136,34 @@ def show_question(id):
     best_option_id = user_questions[session['curr_q_id']].best_option
     worst_option_id = user_questions[session['curr_q_id']].worst_option
 
+    best_option_asc = None
+    worst_option_asc = None
 
     
 
     if best_option_id != None:
         # match to a clip, 0-
         best_option = best_option_id
+        best_option_asc = chr(best_option + 64)
 
     if worst_option_id != None:
         # match to a clip, 0-3
         worst_option = worst_option_id
+        worst_option_asc = chr(worst_option + 64)
+
 
     context = {
         'user_id': session['user_id'],
         'topic': topic.title,
         'question_id': q_id,
+        'annotation':session['annotate'],
         'question_index': session['curr_q_id'],
+        'cur_id':session['curr_q_id'] + 1,
         'max_questions': MAX_QUESTIONS,
         'best_option': best_option,
         'worst_option': worst_option,
+        'best_option_asc': best_option_asc,
+        'worst_option_asc': worst_option_asc,
         'option_1': {
             'embed_link': clip_1.embed_link + '?start=' + str(clip_1.start_time),
             'transcript': clip_1.transcript,
@@ -199,6 +197,8 @@ def answer_question():
     best_option = request.form.get('best_option')
     worst_option = request.form.get('worst_option')
 
+    curent_index = request.form.get('id')
+
     # if not user_id or not question_id or not best_option or not worst_option:
     #     abort(404)
 
@@ -214,57 +214,16 @@ def answer_question():
     # new_answer = User_Question(user_id=user_id, question_id=question_id, best_option=best_option, worst_option=worst_option)
     # db.session.update(current_user_q)
     db.session.commit()
-    
-    return redirect(url_for('show_question', id='1'))
 
-# @app.route('/api/update_questions/', methods=['PUT'])
-# def UpdateQuestions():
-#     topic_file = 'Infrared_Radiation_v1_id.txt.tuples'
-#     topic_id = 84
-#     with open(topic_file, 'r') as f:
-#         for line in f:
-#             data = line.split()
-#             #get data
-#             option_1_id=data[0]
-#             option_2_id=data[1]
-#             option_3_id=data[2]
-#             option_4_id=data[3]
-#
-#             #clean data
-#
-#             #add data
-#             new_question = Question(option_1_id=option_1_id, option_2_id=option_2_id, option_3_id=option_3_id, option_4_id=option_4_id, topic_id=topic_id)
-#             db.session.add(new_question)
-#             print(option_1_id, '|', option_2_id, '|', option_3_id, '|', option_4_id, '|', topic_id)
-#         db.session.commit()
-#     return Response(status=200)
+    # session['annotate'] = int(request.form.get('annotation'))
+    session['annotate'] = min(int(request.form.get('annotation')), session['curr_q_id'] + 1)
+    if session['annotate'] == 18:
+        print(1)
+        return redirect(url_for('contextlearning'))
+    else:
+        return redirect(url_for('show_question', id=str(curent_index)))
 
-# @app.route('/api/update_clips/', methods=['PUT'])
-# def UpdateClips():
-#     topic_file = 'Infrared_Radiation_v1.txt'
-#     topic_id = 84
-#     with open(topic_file, 'r') as f:
-#         for line in f:
-#             try:
-#                 data = line.split('|')
-#                 #get data
-#                 start_time=data[1]
-#                 video_key = data[3]
-#                 transcript = data[4]
-#                 clip_id = data[5]
-#
-#                 #clean data
-#                 start_time = float(start_time)
-#                 start_time = int(start_time)
-#                 clip_id = int(clip_id)
-#
-#                 #add data
-#                 new_clip = Clip(clip_id=clip_id, embed_link=('https://www.youtube.com/embed/'+video_key), start_time=start_time, transcript=transcript, topic_id=topic_id)
-#                 db.session.add(new_clip)
-#                 print(clip_id, '|', video_key, '|', start_time, '|', topic_id)
-#
-#             except:
-#                 print("error:", line)
-#
-#         db.session.commit()
-#     return Response(status=200)
+# @app.route('/new_user/', methods=['POST', 'GET'])
+@app.route('/contextlearning/', methods = ['GET'])
+def contextlearning():
+    return render_template('finish.html')
