@@ -3,45 +3,237 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    
-
     <title>Document</title>
+    <!-- <script src="jquery-3.3.1.min.js"></script> -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            .row {
+                display: flex;
+            }
+
+            /* Create two equal columns that sits next to each other */
+            .column {
+                flex: 50%;
+                padding: 15px;
+            }
+        </style>
 </head>
 <body>
+
+  <center>
+      <h1>Welcome to the Search Ranking Survey</h1>
+    <!-- <div name='user_id' id ='user_id'> Your User ID: {{user_id}}</div> -->
+  </center>
+
+  <fieldset style="height: 800x; width: 900px;float:left;padding:50px;background-color:#bbcfe6;">
+    <div class="column">
+      <div name="best_item" id="best_item">Best Item: {{best_option}}</div> 
+      <div name="worst_item" id="worst_item">Worst Item:{{worst_option}}</div>
+      <p>
+        Topic: {{topic}}
+      </p><br>
+      <div class="row">
+          <div class= "w3-container" style="float:left;padding:30px;">
+
+              <iframe height={360} width={480} loading="lazy"
+              src={{option_2.embed_link}}
+              frameborder="0" allow="accelerometer; autoplay; clipboard-write;
+              encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen="true"></iframe>
+              <p style="width:300px;word-break:normal;white-space:pre-warp; word-wrap:break-word;">A. {{option_1.transcript}}</p>
+          </div>
+          <div style="float:left;padding:30px;">
+              <iframe height={360} width={480} loading="lazy"
+              src={{option_2.embed_link}}
+              frameborder="0" allow="accelerometer; autoplay; clipboard-write;
+              encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen="true"></iframe>
+              <p style="width:300px;word-break:normal;white-space:pre-warp; word-wrap:break-word;">B. {{option_2.transcript}}</p>
+          </div>
+      </div>
+      <div class="row">
+          <div class= "w3-container" style="float:left;padding:30px;">
+              <iframe height={360} width={480} loading="lazy"
+              src={{option_3.embed_link}}
+              frameborder="0" allow="accelerometer; autoplay; clipboard-write;
+              encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen="true"></iframe>
+              <p style="width:300px;word-break:normal;white-space:pre-warp; word-wrap:break-word;">C. {{option_3.transcript}}</p>
+          </div>
+          <div style="float:left;padding:30px;">
+              <iframe height={360} width={480} loading="lazy"
+              src={{option_4.embed_link}}
+              frameborder="0" allow="accelerometer; autoplay; clipboard-write;
+              encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen="true"></iframe>
+              <p style="width:300px;word-break:normal;white-space:pre-warp; word-wrap:break-word;">D. {{option_4.transcript}}</p>
+          </div>
+      </div>
+    </div><br>
+    <button style="float:left;" onclick="Goto(false)"> go back </button>
+    <button style="float:right;"onclick="Goto(true)"> go next </button>
+  </fieldset>
+
+  <div style="float:left;padding:50px;background-color:#fcfcfc;">
+    <p>
+        Please Select the Best Item.
+    </p>
+    <form id="best_option">
+        <input type="radio" name="choice" value=1> A <br>
+        <input type="radio" name="choice" value=2> B <br>
+        <input type="radio" name="choice" value=3> C <br>
+        <input type="radio" name="choice" value=4> D <br>
+    </form>
+    <br>
+    <p>
+        Please Select the Worst Item.
+    </p>
+    <form id="worst_option">
+        <input type="radio" name="choice" value=1> A <br>
+        <input type="radio" name="choice" value=2> B <br>
+        <input type="radio" name="choice" value=3> C <br>
+        <input type="radio" name="choice" value=4> D <br>
+    </form>
+    <br>
+    <button onclick="Answer(best_option.choice.value, worst_option.choice.value)">Save</button>
+  </div>
+
     
 </body>
+
+<script>
+  function post(params, action) {
+        var form = document.createElement("form");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", action);
+
+        for (var key in params) {
+            if (params.hasOwnProperty(key)) {
+                var hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "text");
+                hiddenField.setAttribute("name", key);
+                hiddenField.setAttribute("value", params[key]);
+
+                form.appendChild(hiddenField);
+            }
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+  }
+
+
+    function Answer(best_option, worst_option)
+    {
+      var user_id = {{user_id}};
+      var question_id = {{question_id}};
+
+      console.log(best_option == 0);
+      console.log(worst_option);
+
+
+
+      if (best_option == 0)
+      {
+        alert('please select best_option');
+      }
+      else if  (worst_option == 0)
+      {
+        alert('please select worst_option');
+      }
+
+      else
+      {
+        best_option = best_option.toString();
+        best_item.innerHTML = String.fromCharCode(parseInt(best_option) + 64);   
+        worst_option = worst_option.toString();
+        worst_item.innerHTML = String.fromCharCode(parseInt(worst_option) + 64);
+    
+        var post_req = {
+            user_id: user_id,
+            question_id: question_id,
+            best_option:best_option,
+            worst_option: worst_option
+          }        
+          // console.log(post_req);
+          post(post_req, "/api/answer_question/");
+      }
+    }
+
+    function Goto(next)
+    {
+      var id = {{question_index}};
+      if (next)
+      {
+        id = id + 1;
+      }
+      else
+      {
+        id = id - 1;
+      }
+
+      if (id > {{max_questions}})
+      {
+        alert("You have answered all the questions, You can submit now. Thanks");
+      }
+      else if (id < 0)
+      {
+        alert("already on the first quesiton, Can not go back anymore")
+      }
+      else
+      {
+        var post_req = {
+          id: id
+        };
+
+        console.log(post_req);
+        post(post_req, "/show_question/" + id.toString());
+      }
+    }
+
+
+  </script>
+
 </html>
 
-<!--
-<div class="postcomments">
-    {% for postcomment in comments %}
-    <div class="postcomment">
-      <a href="/u/{{ postcomment['owner'] }}/">
-        {{ postcomment['owner'] }}
-      </a>
+
+
+
+
+
+
+<!-- // <div class="postcomments">
+//     {% for postcomment in comments %}
+//     <div class="postcomment">
+//       <a href="/u/{{ postcomment['owner'] }}/">
+//         {{ postcomment['owner'] }}
+//       </a>
       
-        {{ postcomment['text'] }}
-        {% if postcomment['owner'] == logname %}
-        <form action="/p/{{ postid }}/" method="post" enctype="multipart/form-data">
-          <input type="hidden" name="commentid" value="{{ postcomment['commentid'] }}"/>
-          <input type="submit" name="uncomment" value="delete"/>
-        </form>
-        {% endif %}
+//         {{ postcomment['text'] }}
+//         {% if postcomment['owner'] == logname %}
+//         <form action="/p/{{ postid }}/" method="post" enctype="multipart/form-data">
+//           <input type="hidden" name="commentid" value="{{ postcomment['commentid'] }}"/>
+//           <input type="submit" name="uncomment" value="delete"/>
+//         </form>
+//         {% endif %}
       
-    </div>
-    {% endfor %}
-    <form action="/p/{{ postid }}/" method="post" enctype="multipart/form-data">
-      <input type="hidden" name="postid" value="{{ postid }}"/>
-      <input type="text" name="text"/>
-      <input type="submit" name="comment" value="comment"/>
-    </form>
-    {% if owner == logname %}
-      <form action="/p/{{ postid }}/" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="postid" value="{{ postid }}"/>
-        <input type="submit" name="delete" value="delete this post"/>
-      </form>
-    {% endif %}
-</div>
--->
+//     </div>
+//     {% endfor %}
+//     <form action="/p/{{ postid }}/" method="post" enctype="multipart/form-data">
+//       <input type="hidden" name="postid" value="{{ postid }}"/>
+//       <input type="text" name="text"/>
+//       <input type="submit" name="comment" value="comment"/>
+//     </form>
+//     {% if owner == logname %}
+//       <form action="/p/{{ postid }}/" method="post" enctype="multipart/form-data">
+//         <input type="hidden" name="postid" value="{{ postid }}"/>
+//         <input type="submit" name="delete" value="delete this post"/>
+//       </form>
+//     {% endif %}
+// </div>
+// --> 
 
