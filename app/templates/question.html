@@ -25,9 +25,9 @@
 <body>
 
   <center>
-      <h1>Welcome to Search Ranking Survey</h1>
-      <h2 style="color: crimson;">
-        Please take care of your choice, it means a lot to us! 
+      <h1>Welcome to the Search Ranking Survey</h1>
+      <h2 style="color: crimson; max-width: 500px;">
+        Select the most relevant video clip and the most irrelevant video clip to the search topic below.
         
       </h2>
   </center>
@@ -45,11 +45,11 @@
         <div name="worst_item" id="worst_item">Worst Item:{{worst_option_asc}}</div>
       </p>
       
-      <p style="color:coral; font-size: x-large;">
-        Topic: {{topic}}
+      <p style="color:rgb(255, 94, 45); font-size: x-large;">
+        <b>Topic: {{topic}}</b>
       </p>
-      <p style="font-size: small;">
-        Select the most relevant video clip and the most irrelevant video clip below
+      <p style="font-size: large;">
+        Select the most relevant video clip and the most irrelevant video clip shown below.
       </p>
       <div class="row">
           <div class= "w3-container" style="float:left;padding:30px;">
@@ -93,7 +93,7 @@
 
   <div style="float:left;padding:50px;background-color:#fcfcfc;">
     <p>
-        Please Select the Best Item.
+        Please select the most relevant item.
     </p>
     <form id="best_option">
         <input type="radio" name="choice" value=1> A <br>
@@ -103,7 +103,7 @@
     </form>
     <br>
     <p>
-        Please Select the Worst Item.
+        Please select the most irrelevant item.
     </p>
     <form id="worst_option">
         <input type="radio" name="choice" value=1> A <br>

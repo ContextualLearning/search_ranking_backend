@@ -4,19 +4,49 @@
     <center>
         <h1>Welcome to the Search Ranking Survey</h1>
     </center>
-    <form name = 'form' class = 'form' method = 'POST' action="/new_user/">
-        <!-- <fieldset> -->
-        <left>
-            uniqname:<input name="uniqname" id="uniqname" value="">
-            <input type="hidden" name="source" id="source" value="home">
-            <input type="hidden" name="best_option" id="best_option" value="">
-            <input type="hidden" name="worst_option" id="worst_option" value="">
-            <br>
-            <br>
-            <input type="submit" value="Submit">
-        </left>
-        <!-- </fieldset> -->
-    </form>
+    <div style="max-width: 700px; margin: 0 auto;">
+        <p style="text-align: justify;">
+            In this course, the recordings of lectures have been analyzed using artificial intelligence to allow students
+                to search for terms and phrases from lecture recordings. This research is funded by the University
+                of Michigan and the National Science Foundation.
+        </p>
+        <p style="text-align: justify;">
+            In this survey we simulate a search for a particular topic on each page. Per topic, four videos are presented along
+                with a snippet of the text being spoken at the timestamp in the video returned by the search. We ask you to identify
+                which of the four video clips is the most relevant clip if you were searching for the topic identified on the page.
+                We also ask you to identify which of the four video clips is the most irrelevant clip if you were searching for the
+                topic identified on the page.
+        </p>
+        <p style="text-align: justify;">
+            To receive common good credit, please review each of the four clips on each page, indicate which video clip is the most
+                relevant to the search topic, and identify which video clip is the most irrelevant to the search topic. The results will
+                be used to improve the search engine in the future.
+        </p>
+        <p style="text-align: justify;">
+            Thank you for your participation in this survey.<br>
+            - Prof. Samson
+        </p>
+    </div>
+    <br>
+    <br>
+    <br>
+    <center>
+        <div style="margin: 0 auto;">
+            <form name = 'form' class = 'form' method = 'POST' action="/new_user/">
+                <!-- <fieldset> -->
+                <left>
+                    <i>Please enter your Uniqname to begin the survey:</i>
+                    <br>
+                    <br>
+                    <input type="hidden" name="source" id="source" value="home">
+                    <input type="hidden" name="best_option" id="best_option" value="">
+                    <input type="hidden" name="worst_option" id="worst_option" value="">
+                    <input name="uniqname" id="uniqname" placeholder="uniqname" value=""><input type="submit" value="Submit">
+                </left>
+                <!-- </fieldset> -->
+            </form>
+        </div>
+    </center>
 </body>
 
 </html>
